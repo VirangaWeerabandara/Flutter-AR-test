@@ -36,12 +36,10 @@ class _WebviewState extends State<Webview> {
       ),
       body: Column(
         children: <Widget>[
-          SizedBox(
-            height: 800,
-            width: 400,
+          Expanded(
             child: InAppWebView(
-              initialUrlRequest: URLRequest(
-                  url: WebUri('https://elegant-tanuki-0787ed.netlify.app/')),
+              initialUrlRequest:
+                  URLRequest(url: WebUri('https://www.google.com/')),
             ),
           ),
         ],
