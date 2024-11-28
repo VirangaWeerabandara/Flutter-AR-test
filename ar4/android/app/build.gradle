@@ -1,0 +1,51 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.ar4"
+    compileSdk = 34 // Updated to a more recent version for better compatibility
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8 // Use JavaVersion enum for clarity
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8" // Ensure the JVM target is set correctly
+    }
+
+    defaultConfig {
+        applicationId = "com.example.ar4"
+        minSdk = 29 // Ensure this matches plugin compatibility
+        targetSdk = 29 // Updated for better compatibility with the latest tools
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.8.0'
+
+    // Alternatively, use ArSceneView without the UX dependency.
+    implementation 'com.google.ar.sceneform:core:1.8.0'
+
+    implementation ('com.gorisse.thomas.sceneform:core:1.21.0') {
+    exclude group: 'com.google.ar.sceneform', module: 'sceneform-base'
+}
+
+}
