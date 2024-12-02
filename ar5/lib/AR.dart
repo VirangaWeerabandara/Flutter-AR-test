@@ -12,6 +12,10 @@ class AR extends StatefulWidget {
 class _ARState extends State<AR> {
   ArCoreController? arCoreController;
   bool _isLoading = true;
+  ArCoreNode? currentNode;
+  double currentAngle = 0.0;
+  double _baseRotation = 0.0;
+  double _dragX = 0.0;
 
   @override
   void initState() {
@@ -36,43 +40,49 @@ class _ARState extends State<AR> {
 
   void onArCoreViewCreated(ArCoreController controller) {
     arCoreController = controller;
-    arCoreController?.onNodeTap = (name) => onNodeTapped(name);
     load3DModel();
-  }
-
-  void onNodeTapped(String name) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Node $name was tapped'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> load3DModel() async {
     try {
-      // Example direct URLs for 3D models:
-      // 1. GLTF model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf
-      // 2. GLB model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb
-
+      final material = ArCoreMaterial(
+        color: Colors.white,
+        metallic: 1.0,
+        roughness: 0.5,
+        reflectance: 1.0,
+      );
       final node = ArCoreReferenceNode(
-        name: 'duck_model',
+        name: 'custom_model',
         objectUrl:
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
-        position: vector.Vector3(0, -1, -2), // Adjust position as needed
-        rotation: vector.Vector4(0, 180, 0, 0),
-        scale: vector.Vector3(0.2, 0.2, 0.2), // Adjust scale as needed
+            'https://github.com/VirangaWeerabandara/Flutter-AR-test/raw/refs/heads/main/ar5/assets/iron_man.glb',
+        position: vector.Vector3(0, -1, -2),
+        rotation: vector.Vector4(0, currentAngle, 0, 1),
+        scale: vector.Vector3(0.5, 0.5, 0.5),
       );
 
       await arCoreController?.addArCoreNode(node);
+      currentNode = node;
     } catch (e) {
       _showError('Failed to load 3D model: $e');
+    }
+  }
+
+  void updateRotation() async {
+    try {
+      final node = ArCoreReferenceNode(
+        name: 'custom_model',
+        objectUrl:
+            'https://github.com/VirangaWeerabandara/Flutter-AR-test/raw/refs/heads/main/ar5/assets/iron_man.glb',
+        position: vector.Vector3(0, -1, -2),
+        rotation: vector.Vector4(0, currentAngle, 0, 1),
+        scale: vector.Vector3(0.5, 0.5, 0.5),
+      );
+
+      await arCoreController?.removeNode(nodeName: 'custom_model');
+      await arCoreController?.addArCoreNode(node);
+      currentNode = node;
+    } catch (e) {
+      _showError('Failed to rotate model: $e');
     }
   }
 
@@ -100,9 +110,22 @@ class _ARState extends State<AR> {
           ),
         ],
       ),
-      body: ArCoreView(
-        onArCoreViewCreated: onArCoreViewCreated,
-        enableTapRecognizer: true,
+      body: GestureDetector(
+        onPanUpdate: (details) {
+          setState(() {
+            _dragX += details.delta.dx * 0.5;
+            currentAngle = _baseRotation + _dragX;
+            updateRotation();
+          });
+        },
+        onPanEnd: (_) {
+          _baseRotation = currentAngle;
+          _dragX = 0;
+        },
+        child: ArCoreView(
+          onArCoreViewCreated: onArCoreViewCreated,
+          enableTapRecognizer: true,
+        ),
       ),
     );
   }
