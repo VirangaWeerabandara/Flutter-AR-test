@@ -1,6 +1,5 @@
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 class AR extends StatefulWidget {
@@ -58,13 +57,17 @@ class _ARState extends State<AR> {
 
   Future<void> load3DModel() async {
     try {
+      // Example direct URLs for 3D models:
+      // 1. GLTF model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf
+      // 2. GLB model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb
+
       final node = ArCoreReferenceNode(
-        name: 'model',
+        name: 'duck_model',
         objectUrl:
-            'https://drive.google.com/file/d/1VvVpDdveK7ya4Pu2xrkvJVEqVWIYk2fF/view?usp=sharing',
-        position: vector.Vector3(0, 0, -1),
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
+        position: vector.Vector3(0, -1, -2), // Adjust position as needed
         rotation: vector.Vector4(0, 180, 0, 0),
-        scale: vector.Vector3(0.5, 0.5, 0.5),
+        scale: vector.Vector3(0.2, 0.2, 0.2), // Adjust scale as needed
       );
 
       await arCoreController?.addArCoreNode(node);
@@ -89,7 +92,7 @@ class _ARState extends State<AR> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AR Viewer'),
+        title: const Text('AR View'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -100,7 +103,6 @@ class _ARState extends State<AR> {
       body: ArCoreView(
         onArCoreViewCreated: onArCoreViewCreated,
         enableTapRecognizer: true,
-        enableUpdateListener: true,
       ),
     );
   }
